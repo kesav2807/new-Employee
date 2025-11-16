@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
-import { updateEmployee } from '../services/employeeService';
+import { useState, useEffect } from "react";
+import { updateEmployee } from "../services/employeeService";
 
 export default function UpdateEmployee({ employee, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    name: '',
-    age: '',
-    skills: '',
-    address: '',
-    designation: ''
+    name: "",
+    age: "",
+    skills: "",
+    address: "",
+    designation: "",
+    profileImage: null,
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     if (employee) {
@@ -17,36 +19,58 @@ export default function UpdateEmployee({ employee, onClose, onSuccess }) {
         age: employee.age.toString(),
         skills: employee.skills,
         address: employee.address,
-        designation: employee.designation
+        designation: employee.designation,
+        profileImage: null,
       });
+      if (employee.profileImage) {
+        setImagePreview(`http://localhost:3000${employee.profileImage}`);
+      }
     }
   }, [employee]);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, profileImage: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.age || !formData.skills || !formData.address || !formData.designation) {
-      alert('All fields are required');
+
+    if (
+      !formData.name ||
+      !formData.age ||
+      !formData.skills ||
+      !formData.address ||
+      !formData.designation
+    ) {
+      alert("All fields are required");
       return;
     }
 
     try {
       await updateEmployee(employee._id, {
         ...formData,
-        age: parseInt(formData.age)
+        age: parseInt(formData.age),
       });
-      alert('Employee updated successfully');
+      alert("Employee updated successfully");
       onSuccess();
     } catch (error) {
-      console.error('Error updating employee:', error);
-      alert('Failed to update employee');
+      console.error("Error updating employee:", error);
+      alert("Failed to update employee");
     }
   };
 
@@ -107,9 +131,27 @@ export default function UpdateEmployee({ employee, onClose, onSuccess }) {
               required
             />
           </div>
+          <div className="form-group">
+            <label>Profile Image:</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="file-input"
+            />
+            {imagePreview && (
+              <div className="image-preview">
+                <img src={imagePreview} alt="Preview" />
+              </div>
+            )}
+          </div>
           <div className="modal-actions">
-            <button type="submit" className="btn-submit">Update Employee</button>
-            <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn-submit">
+              Update Employee
+            </button>
+            <button type="button" className="btn-cancel" onClick={onClose}>
+              Cancel
+            </button>
           </div>
         </form>
       </div>
