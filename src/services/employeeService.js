@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/employees";
+const API_URL = "https://employee-rvrh.onrender.com/api/employees";
 
 export const getAllEmployees = async (
   page = 1,
