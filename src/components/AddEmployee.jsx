@@ -1,40 +1,60 @@
-import { useState } from 'react';
-import { createEmployee } from '../services/employeeService';
+import { useState } from "react";
+import { createEmployee } from "../services/employeeService";
 
 export default function AddEmployee({ onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    name: '',
-    age: '',
-    skills: '',
-    address: '',
-    designation: ''
+    name: "",
+    age: "",
+    skills: "",
+    address: "",
+    designation: "",
+    profileImage: null,
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, profileImage: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.age || !formData.skills || !formData.address || !formData.designation) {
-      alert('All fields are required');
+
+    if (
+      !formData.name ||
+      !formData.age ||
+      !formData.skills ||
+      !formData.address ||
+      !formData.designation
+    ) {
+      alert("All fields are required");
       return;
     }
 
     try {
       await createEmployee({
         ...formData,
-        age: parseInt(formData.age)
+        age: parseInt(formData.age),
       });
-      alert('Employee added successfully');
+      alert("Employee added successfully");
       onSuccess();
     } catch (error) {
-      console.error('Error adding employee:', error);
-      alert('Failed to add employee');
+      console.error("Error adding employee:", error);
+      alert("Failed to add employee");
     }
   };
 
@@ -95,9 +115,27 @@ export default function AddEmployee({ onClose, onSuccess }) {
               required
             />
           </div>
+          <div className="form-group">
+            <label>Profile Image:</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="file-input"
+            />
+            {imagePreview && (
+              <div className="image-preview">
+                <img src={imagePreview} alt="Preview" />
+              </div>
+            )}
+          </div>
           <div className="modal-actions">
-            <button type="submit" className="btn-submit">Add Employee</button>
-            <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn-submit">
+              Add Employee
+            </button>
+            <button type="button" className="btn-cancel" onClick={onClose}>
+              Cancel
+            </button>
           </div>
         </form>
       </div>
